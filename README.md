@@ -1,4 +1,4 @@
-﻿# 🎮 Legion Performance & Game FPS Monitor (v2.5 PRO)
+# 🎮 OmniDeck: Universal Hardware & Game HUD (v2.5 PRO)
 
 <div align="center">
 
@@ -6,9 +6,9 @@
 ![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![React](https://img.shields.io/badge/Frontend-React%2018%20%2B%20Vite%20%2B%20TailwindCSS-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![Edge WebView2](https://img.shields.io/badge/Shell-Microsoft%20Edge%20WebView2-0078D7?style=for-the-badge&logo=microsoftedge)
-![Hardware](https://img.shields.io/badge/Hardware-Lenovo%20Legion%20%7C%20Ryzen%207%20%7C%20RTX%203060-E2231A?style=for-the-badge&logo=lenovo)
+![Hardware](https://img.shields.io/badge/Hardware-Universal%20PC%20%7C%20Intel%20%26%20AMD%20%7C%20NVIDIA%20%26%20Radeon-00F0FF?style=for-the-badge)
 
-**Ứng dụng đo FPS thời gian thực, trực quan hóa hiệu năng và giám sát phần cứng chuyên sâu đẳng cấp Modern Desktop Application** kết hợp công nghệ **Tauri-Level (React 18 + TailwindCSS + Framer Motion trên Edge WebView2)** và thiết kế **Apple Minimalist Dark Glassmorphism**.
+**OmniDeck** là trung tâm giám sát phần cứng thời gian thực toàn năng (Universal Hardware Telemetry), đo FPS game chuyên sâu và hiển thị In-Game HUD trong suốt đa bố cục đỉnh cao trên Windows 10/11. Kết hợp công nghệ **Tauri-Level (React 18 + TailwindCSS + Framer Motion trên Edge WebView2)** và thiết kế **Apple Minimalist Dark Glassmorphism**.
 
 </div>
 
