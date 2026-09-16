@@ -1,0 +1,54 @@
+﻿{
+  "overlay_enabled": true,
+  "overlay_layout": "horizontal",
+  "overlay_theme": "apple_dark",
+  "overlay_scale": "medium",
+  "overlay_bg_mode": "badges",
+  "overlay_transparency_pct": 65,
+  "overlay_bg_transparency_pct": 65,
+  "overlay_text_transparency_pct": 100,
+  "overlay_click_through": false,
+  "overlay_position": {
+    "x": 100,
+    "y": 20
+  },
+  "overlay_width_mode": "auto",
+  "overlay_manual_width": 1080,
+  "overlay_show_bottom_graphs": true,
+  "overlay_bottom_graphs": {
+    "fps": true,
+    "cpu": true,
+    "gpu": true,
+    "ram_net": true,
+    "fan": true
+  },
+  "overlay_mini_graphs": {
+    "fps": true,
+    "cpu": true,
+    "gpu": true,
+    "ram": false,
+    "network": false
+  },
+  "metrics": {
+    "app_name": true,
+    "fps": true,
+    "one_percent_low": true,
+    "frametime": false,
+    "cpu_temp": true,
+    "cpu_usage": true,
+    "cpu_clock": false,
+    "gpu_temp": true,
+    "gpu_usage": true,
+    "gpu_clock": false,
+    "gpu_power": true,
+    "ram": true,
+    "network": true,
+    "fan": true
+  },
+  "overlay_fan_mode": "dual",
+  "dashboard_show_fan": true,
+  "minimize_to_tray": true,
+  "close_to_tray": true,
+  "start_minimized": false,
+  "overlay_alpha": 0.92
+}
