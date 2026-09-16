@@ -49,7 +49,7 @@ sys.excepthook = _global_exception_handler
 
 # Set AppUserModelID for Windows Taskbar binding
 try:
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Lenovo.Legion.FPSMonitor.App.2.4")
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("ZeusAIE.OmniDeck.App.2.5")
 except Exception:
     pass
 
@@ -254,7 +254,7 @@ class ModernLegionApp:
 
         # 2. WebView2 Window (created cleanly on main thread)
         self.win = webview.create_window(
-            title="Legion Performance & FPS Monitor PRO 2.4",
+            title="OmniDeck - Universal Hardware & Game HUD v2.5 PRO",
             url=self.html_path if os.path.exists(self.html_path) else "about:blank",
             js_api=self.api,
             width=960,
