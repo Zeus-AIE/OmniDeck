@@ -171,7 +171,7 @@ class SettingsManager:
     def load(self):
         if os.path.exists(self.filepath):
             try:
-                with open(self.filepath, "r", encoding="utf-8") as f:
+                with open(self.filepath, "r", encoding="utf-8-sig") as f:
                     data = json.load(f)
                     # Merge shallowly with defaults to ensure all keys exist
                     for k, v in data.items():

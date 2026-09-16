@@ -45,7 +45,7 @@ export default function DashboardTab({ fpsData = {}, hwData = {}, settings = {} 
   const gpuUsage = hwData.gpu_usage || 0;
   const gpuClock = hwData.gpu_clock_mhz || 0;
   const gpuPower = hwData.gpu_power_w || 0;
-  const gpuName = hwData.gpu_name || "NVIDIA GeForce RTX 3060";
+  const gpuName = hwData.gpu_name || "Đang nhận diện đồ họa...";
 
   const gpuColor =
     gpuTemp < 70 ? "#0A84FF" :
@@ -56,7 +56,7 @@ export default function DashboardTab({ fpsData = {}, hwData = {}, settings = {} 
   const cpuUsage = hwData.cpu_usage || 0;
   const cpuClock = hwData.cpu_freq_mhz || 0;
   const cpuFreqGhz = hwData.cpu_freq_ghz || (cpuClock / 1000);
-  const cpuName = hwData.cpu_name || "AMD Ryzen 7 5800H";
+  const cpuName = hwData.cpu_name || "Đang nhận diện vi xử lý...";
 
   const cpuColor =
     cpuTemp < 75 ? "#FF453A" :
@@ -282,7 +282,7 @@ export default function DashboardTab({ fpsData = {}, hwData = {}, settings = {} 
                     HỆ THỐNG TẢN NHIỆT KÉP (DUAL-FAN TELEMETRY)
                   </span>
                   <span className="text-[10px] font-bold text-apple-teal px-2 py-0.5 rounded-md bg-apple-teal/10 border border-apple-teal/20">
-                    Lenovo Legion 5
+                    {hwData.system_display_name || "Hệ thống đa năng"}
                   </span>
                 </div>
               </div>
@@ -324,9 +324,9 @@ export default function DashboardTab({ fpsData = {}, hwData = {}, settings = {} 
                   </div>
                   <div>
                     <span className="text-[11px] font-bold text-[#86868b] tracking-wider uppercase block">
-                      QUẠT TRÁI (CPU FAN)
+                      QUẠT TRÁI ({hwData.cpu_short_name || "CPU FAN"})
                     </span>
-                    <span className="text-[10px] text-white/60">Tản nhiệt chip Ryzen 7</span>
+                    <span className="text-[10px] text-white/60">Tản nhiệt {hwData.cpu_short_name || "vi xử lý"}</span>
                   </div>
                 </div>
 
@@ -393,9 +393,9 @@ export default function DashboardTab({ fpsData = {}, hwData = {}, settings = {} 
                   </div>
                   <div>
                     <span className="text-[11px] font-bold text-[#86868b] tracking-wider uppercase block">
-                      QUẠT PHẢI (GPU FAN)
+                      QUẠT PHẢI ({hwData.gpu_short_name || "GPU FAN"})
                     </span>
-                    <span className="text-[10px] text-white/60">Tản nhiệt card RTX 3060</span>
+                    <span className="text-[10px] text-white/60">Tản nhiệt {hwData.gpu_short_name || "card đồ họa"}</span>
                   </div>
                 </div>
 

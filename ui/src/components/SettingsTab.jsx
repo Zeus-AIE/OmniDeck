@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Sliders, Eye, BarChart3, Palette, CheckSquare, ShieldCheck, Wind, Layout, Sparkles, Cpu, Layers, Tv, Activity } from "lucide-react";
 
-export default function SettingsTab({ settings = {}, onUpdateSettings }) {
+export default function SettingsTab({ settings = {}, onUpdateSettings, hwData = {} }) {
   const containerRef = useRef(null);
   const [isWide, setIsWide] = useState(true);
 
@@ -107,7 +107,7 @@ export default function SettingsTab({ settings = {}, onUpdateSettings }) {
       ]
     },
     {
-      name: "Vi xử lý CPU (AMD Ryzen 7)",
+      name: hwData.cpu_short_name ? `Vi xử lý CPU (${hwData.cpu_short_name})` : "Vi xử lý CPU",
       color: "text-[#FF9F0A]",
       dotColor: "bg-[#FF9F0A]",
       items: [
@@ -117,7 +117,7 @@ export default function SettingsTab({ settings = {}, onUpdateSettings }) {
       ]
     },
     {
-      name: "Đồ họa GPU (NVIDIA RTX 3060)",
+      name: hwData.gpu_short_name ? `Đồ họa GPU (${hwData.gpu_short_name})` : "Đồ họa GPU",
       color: "text-[#0A84FF]",
       dotColor: "bg-[#0A84FF]",
       items: [

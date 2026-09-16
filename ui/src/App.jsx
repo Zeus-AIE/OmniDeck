@@ -35,12 +35,22 @@ export default function App() {
   });
 
   const [hwData, setHwData] = useState({
-    cpu_name: "AMD Ryzen 7 5800H",
+    system_manufacturer: "PC",
+    system_model: "System",
+    system_family: "",
+    system_display_name: "Đang nhận diện...",
+    system_short_brand: "PC",
+    is_laptop: true,
+    cpu_name: "Đang nhận diện vi xử lý...",
+    cpu_short_name: "CPU",
+    cpu_cores: 0,
+    cpu_threads: 0,
     cpu_temp: 0,
     cpu_usage: 0,
     cpu_freq_mhz: 0,
     cpu_freq_ghz: 0,
-    gpu_name: "NVIDIA GeForce RTX 3060",
+    gpu_name: "Đang nhận diện đồ họa...",
+    gpu_short_name: "GPU",
     gpu_temp: 0,
     gpu_usage: 0,
     gpu_clock_mhz: 0,
@@ -160,10 +170,10 @@ export default function App() {
       <header className="apple-glass z-20 flex items-center justify-between px-6 py-3 border-b border-white/5 flex-shrink-0">
         <div className="flex items-center space-x-3">
           <h1 className="font-display font-extrabold text-lg text-white tracking-tight flex items-center space-x-2">
-            <span>Legion Monitor</span>
+            <span>{hwData.system_display_name || "Hardware Monitor"}</span>
           </h1>
           <span className="px-2 py-0.5 text-[10px] font-bold text-apple-blue bg-apple-blue/10 border border-apple-blue/20 rounded-md">
-            PRO 2.4
+            v2.5 PRO
           </span>
         </div>
 
@@ -237,7 +247,7 @@ export default function App() {
           <GraphsTab fpsData={fpsData} hwData={hwData} />
         )}
         {activeTab === "settings" && (
-          <SettingsTab settings={settings} onUpdateSettings={handleUpdateSettings} />
+          <SettingsTab settings={settings} onUpdateSettings={handleUpdateSettings} hwData={hwData} />
         )}
       </main>
 

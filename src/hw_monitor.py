@@ -1,7 +1,7 @@
 """
-Enhanced Hardware Monitor module for Lenovo Legion and Windows Systems.
-Extracts GPU metrics via NVML (Temp, Core Clock, Mem Clock, Watts, Load, VRAM)
-and CPU metrics via psutil/registry (Temp, Dynamic Clock MHz, Load, Threads, RAM, NET).
+Universal Hardware Monitor module for Windows Systems (Lenovo, ASUS, Dell, HP, MSI, Acer, Custom PCs).
+Extracts GPU metrics via NVML C-API or Windows GPU Counters, CPU metrics via PDH/Registry,
+and system/fan telemetry via multi-vendor hardware providers.
 Maintains 60-second rolling history buffers for real-time visualization graphs.
 """
 
@@ -13,6 +13,7 @@ import threading
 import collections
 from typing import Optional, Dict, Any, List
 import psutil
+from universal_hardware import UniversalHardwareManager, get_gpu_short_name
 
 # Structure definitions for NVML
 class _NVMLMemory(ctypes.Structure):
@@ -37,13 +38,34 @@ class _PDH_FMT_COUNTERVALUE(ctypes.Structure):
 class HardwareMonitor:
     def __init__(self):
         self._lock = threading.Lock()
-        self.cpu_name = self._detect_cpu_name()
-        self.gpu_name = "NVIDIA GeForce RTX 3060 Laptop GPU"
+        
+        # Universal System & Hardware Identification
+        self.hw_mgr = UniversalHardwareManager()
+        self.system_info = self.hw_mgr.system_info
+        self.cpu_specs = self.hw_mgr.cpu_specs
+        
+        self.system_manufacturer = self.system_info["manufacturer"]
+        self.system_model = self.system_info["model"]
+        self.system_family = self.system_info["family"]
+        self.system_display_name = self.system_info["display_name"]
+        self.system_short_brand = self.system_info["short_brand"]
+        self.is_laptop = self.system_info["is_laptop"]
+        
+        self.cpu_name = self.cpu_specs["name"]
+        self.cpu_short_name = self.cpu_specs["short_name"]
+        self.cpu_vendor = self.cpu_specs["vendor"]
+        self.cpu_base_mhz = self.cpu_specs["base_mhz"]
+        self.cpu_cores = self.cpu_specs["cores"]
+        self.cpu_threads = self.cpu_specs["threads"]
+        
+        self.gpu_name = self.hw_mgr.gpu_name
+        self.gpu_short_name = self.hw_mgr.gpu_short_name
+        self.all_gpus = self.hw_mgr.gpus
         
         # CPU
         self.cpu_usage = 0.0
-        self.cpu_freq_mhz = 3201.0
-        self.cpu_freq_ghz = 3.20
+        self.cpu_freq_mhz = self.cpu_base_mhz
+        self.cpu_freq_ghz = round(self.cpu_base_mhz / 1000.0, 2)
         self.cpu_temp = 51.0
         self.cpu_threads_usage: List[float] = []
         
@@ -56,11 +78,12 @@ class HardwareMonitor:
         self.gpu_mem_used_mb = 0
         self.gpu_mem_total_mb = 6144
         
-        # RAM
-        self.ram_percent = 0.0
-        self.ram_used_gb = 0.0
-        self.ram_total_gb = 16.0
-        self.ram_avail_gb = 8.0
+        # RAM (Read exact physical total)
+        vmem = psutil.virtual_memory()
+        self.ram_percent = vmem.percent
+        self.ram_used_gb = round(vmem.used / (1024 ** 3), 1)
+        self.ram_total_gb = round(vmem.total / (1024 ** 3), 1)
+        self.ram_avail_gb = round(vmem.available / (1024 ** 3), 1)
         
         # Network Speed
         self.net_down_speed = 0.0  # bytes/sec
@@ -91,7 +114,7 @@ class HardwareMonitor:
         self.fan_percent = 38
         self.fan_cpu_percent = 37
         self.fan_gpu_percent = 40
-        self.fan_mode = "Lenovo Q-Control Smart Fan"
+        self.fan_mode = f"{self.system_short_brand} Smart Fan"
         self._current_cpu_fan_rpm = 1780.0
         self._current_gpu_fan_rpm = 1920.0
         self._wmi_fan_tested = False
@@ -132,7 +155,7 @@ class HardwareMonitor:
 
     def _get_cpu_dynamic_freq(self, c_usage: float) -> float:
         """Query real-time dynamic CPU clock via PDH or boost calculation."""
-        base_mhz = 3201.0
+        base_mhz = getattr(self, "cpu_base_mhz", 3200.0)
         if self._pdh and self._h_query and self._h_counter:
             try:
                 if self._pdh.PdhCollectQueryData(self._h_query) == 0:
@@ -141,23 +164,16 @@ class HardwareMonitor:
                         perf_pct = val.doubleValue
                         if perf_pct > 0:
                             actual_mhz = (perf_pct / 100.0) * base_mhz
-                            return round(max(800.0, min(4450.0, actual_mhz)), 0)
+                            return round(max(800.0, min(base_mhz * 1.6, actual_mhz)), 0)
             except Exception:
                 pass
         # Fallback to load-based scaling if PDH unavailable
         est_mhz = base_mhz * (0.60 + (c_usage / 100.0) * 0.75)
-        return round(max(1400.0, min(4400.0, est_mhz)), 0)
+        return round(max(800.0, min(base_mhz * 1.5, est_mhz)), 0)
 
     def _detect_cpu_name(self) -> str:
         """Read CPU name directly from Windows Registry without spawning any process."""
-        try:
-            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"HARDWARE\DESCRIPTION\System\CentralProcessor\0") as key:
-                name, _ = winreg.QueryValueEx(key, "ProcessorNameString")
-                if name:
-                    return name.strip()
-        except Exception:
-            pass
-        return "AMD Ryzen 7 5800H with Radeon Graphics"
+        return self.cpu_name
 
     def _init_nvml(self):
         """Initialize NVML via ctypes for zero-process, zero-window GPU queries."""
@@ -170,6 +186,11 @@ class HardwareMonitor:
                     name_buf = ctypes.create_string_buffer(64)
                     if self._nvml.nvmlDeviceGetName(handle, name_buf, 64) == 0:
                         self.gpu_name = name_buf.value.decode("utf-8")
+                        self.gpu_short_name = get_gpu_short_name(self.gpu_name)
+                    # Query initial VRAM
+                    mem = _NVMLMemory()
+                    if self._nvml.nvmlDeviceGetMemoryInfo(handle, ctypes.byref(mem)) == 0:
+                        self.gpu_mem_total_mb = int(mem.total // (1024 * 1024))
         except Exception:
             self._nvml = None
             self._gpu_handle = None
@@ -465,13 +486,27 @@ class HardwareMonitor:
     def get_snapshot(self) -> dict:
         with self._lock:
             return {
+                # Universal System & Hardware Identification
+                "system_manufacturer": getattr(self, "system_manufacturer", "Universal PC"),
+                "system_model": getattr(self, "system_model", "Standard System"),
+                "system_family": getattr(self, "system_family", ""),
+                "system_display_name": getattr(self, "system_display_name", "Universal System"),
+                "system_short_brand": getattr(self, "system_short_brand", "PC"),
+                "is_laptop": getattr(self, "is_laptop", True),
                 "cpu_name": self.cpu_name,
+                "cpu_short_name": getattr(self, "cpu_short_name", "CPU"),
+                "cpu_vendor": getattr(self, "cpu_vendor", "Generic"),
+                "cpu_base_mhz": getattr(self, "cpu_base_mhz", 3200.0),
+                "cpu_cores": getattr(self, "cpu_cores", 4),
+                "cpu_threads": getattr(self, "cpu_threads", 8),
                 "cpu_usage": self.cpu_usage,
                 "cpu_freq_mhz": self.cpu_freq_mhz,
                 "cpu_freq_ghz": self.cpu_freq_ghz,
                 "cpu_temp": self.cpu_temp,
                 "cpu_threads_usage": list(self.cpu_threads_usage),
                 "gpu_name": self.gpu_name,
+                "gpu_short_name": getattr(self, "gpu_short_name", "GPU"),
+                "all_gpus": getattr(self, "all_gpus", []),
                 "gpu_temp": self.gpu_temp,
                 "gpu_usage": self.gpu_usage,
                 "gpu_clock_mhz": self.gpu_clock_mhz,
